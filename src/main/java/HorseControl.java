@@ -3,7 +3,7 @@
  * 每行有两种表示方式：2**col种放法（0表示空着，1表示放马）；3**col种状态，0表示空着，1表示有马，2表示被控
  * 插头DP，滚动数组
  **/
-class Main {
+class HorseControl {
 
 final int SPACE = 0;
 final int HORSE = 1;
@@ -163,7 +163,7 @@ int getCount() {
     return ans;
 }
 
-Main() {
+HorseControl() {
     if (row < col || col <= 2) throw new RuntimeException("row > col >2 is needed");
     init();
     int ans = getCount();
@@ -171,6 +171,6 @@ Main() {
 }
 
 public static void main(String[] args) {
-    new Main();
+    new HorseControl();
 }
 }
