@@ -9,14 +9,13 @@ final int SPACE = 0;
 final int HORSE = 1;
 final int CONTROL = 2;
 
-int row = 4, col = 4;
+int row = 5, col = 5;
 int ROWSTATE = (int) Math.pow(3, col);//一行的状态数：从0000到2222
 
 
 //滚动数组动态规划
 int[][] a = new int[ROWSTATE][ROWSTATE];//最近两行的局面
 int[][] b = new int[ROWSTATE][ROWSTATE];//最近两行的局面
-int direction[][] = {{1, 2}, {1, -2}, {2, 1}, {-2, 1}, {-1, 2}, {-1, -2}, {2, -1}, {-2, -1}};
 int leg[][] = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
 int[] pow = new int[col];//预先存下3的幂次
@@ -82,6 +81,12 @@ int put(int rowState, int x, int value) {
     else return rowState + (pow[x] << 1);
 }
 
+void control(int x, int y) {
+    if (legal(x, y) && chessAt[threeLine[x]][y] == 0) {
+        threeLine[x] = put(threeLine[x], y, CONTROL);
+    }
+}
+
 void calculateState(int i, int j, int k) {
     threeLine[0] = i;
     threeLine[1] = j;
@@ -92,16 +97,14 @@ void calculateState(int i, int j, int k) {
                 for (int t = 0; t < leg.length; t++) {//四个方向
                     int legX = p + leg[t][0], legY = q + leg[t][1];
                     if (legal(legX, legY) && chessAt[threeLine[legX]][legY] != 1) {//不能绊马腿
-                        for (int tt = 0; tt < 2; tt++) {
-                            int x = p + direction[t << tt][0], y = q + direction[t << tt][1];
-                            if (legal(x, y)) {
-                                if (chessAt[threeLine[x]][y] == 0) {
-                                    threeLine[x] = put(threeLine[x], y, CONTROL);
-                                }
-                            }
+                        if (leg[t][0] == 0) {
+                            control(p - 1, legY + leg[t][1]);
+                            control(p + 1, legY + leg[t][1]);
+                        } else {//leg[i][1]==0
+                            control(legX + leg[t][0], q - 1);
+                            control(legX + leg[t][0], q + 1);
                         }
                     }
-
                 }
             }
         }
