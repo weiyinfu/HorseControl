@@ -1,5 +1,5 @@
 public class SingleThreadQueen {
-
+//单线程8皇后
 class Node {
     int vertical, leftFail, rightFail;
 

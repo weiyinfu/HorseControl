@@ -1,3 +1,6 @@
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class MultiThreadQueen {
@@ -25,6 +28,7 @@ void run(int pos) {
     int qi = 0;
     q[qi++] = pos;
     int delta = 2;
+    int ret = 0;
     if ((N & 1) == 1 && pos == N / 2) {
         delta = 1;
     }
@@ -32,7 +36,7 @@ void run(int pos) {
         int col = q[--qi];
         int row = qi;
         if (col == N || qi == N) {
-            if (qi == N) cnt.addAndGet(delta);
+            if (qi == N) ret += delta;
             if (qi == 1) break;
             //undo operation
             col = q[--qi];
@@ -58,17 +62,22 @@ void run(int pos) {
             q[qi++] = col + 1;
         }
     }
+    cnt.addAndGet(ret);
 }
 
-int go(int N) throws InterruptedException {
+void init(int N) {
     this.N = N;
-    a = new Node[N][N];
     cnt.set(0);
+    a = new Node[N][N];
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
             a[i][j] = new Node(j, i + j, i + N - j);
         }
     }
+}
+
+int goHalfN(int N) throws InterruptedException {
+    init(N);
     Thread[] th = new Thread[(int) Math.ceil(N / 2.0)];
     for (int i = 0; i < th.length; i++) {
         final int pos = i;
@@ -82,10 +91,30 @@ int go(int N) throws InterruptedException {
     return cnt.get();
 }
 
+//按理说，线程数等于CPU数时运行速度最快
+int goFixThread(int N) {
+    init(N);
+    //最优线程数等于核数的两倍
+    ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() << 1);
+    for (int i = 0; i < Math.ceil(N / 2.0); i++) {
+        final int pos = i;
+        service.execute(() -> MultiThreadQueen.this.run(pos));
+    }
+    service.shutdown();//不再提交任务
+    try {
+        service.awaitTermination(Integer.MAX_VALUE, TimeUnit.SECONDS);
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+    return cnt.get();
+}
+
 MultiThreadQueen() throws InterruptedException {
     for (int i = 1; i <= 17; i++) {
         long beg = System.currentTimeMillis();
-        System.out.println(i + "=" + go(i) + ",time=" + (System.currentTimeMillis() - beg) + "ms");
+        System.out.println("halfN " + i + "=" + goHalfN(i) + ",time=" + (System.currentTimeMillis() - beg) + "ms");
+        beg = System.currentTimeMillis();
+        System.out.println("fix  " + i + "=" + goFixThread(i) + ",time=" + (System.currentTimeMillis() - beg) + "ms");
     }
 }
 
@@ -94,6 +123,10 @@ public static void main(String[] args) throws InterruptedException {
 }
 }
 /**
+ * halfN和fix 两种方法时间差不多，fix并没有快多少
+ * 在这个问题中，因为只到17皇后，只需要9个线程。所以刚好看不出差距来
+ * <p>
+ * halfN方法
  * 1=1,time=104ms
  * 2=0,time=1ms
  * 3=0,time=0ms
