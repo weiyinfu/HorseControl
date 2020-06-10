@@ -1,17 +1,19 @@
+package eightqueen;
+
 import java.util.Scanner;
 
 /**
  * 在N*M的棋盘上放置若干个互不攻击的炮，有多少种放法？
  * 动态规划插头DP，逐行放置，考虑每列炮数为0，1的个数。
  * dp[i][j][k]表示第i行有j个0炮列、k个1炮列的情况下有多少种放法
- *
+ * <p>
  * 问题链接
  * https://www.luogu.org/problemnew/show/P2051
- * */
-public class Main {
+ */
+public class PlaceCanon {
 int MA = 9999973;
 
-Main() {
+PlaceCanon() {
     Scanner cin = new Scanner(System.in);
     int N = cin.nextInt(), M = cin.nextInt();
     if (N < M) {
@@ -75,6 +77,6 @@ Main() {
 }
 
 public static void main(String[] args) {
-    new Main();
+    new PlaceCanon();
 }
 }

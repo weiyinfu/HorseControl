@@ -1,3 +1,5 @@
+package eightqueen;
+
 public class SingleThreadQueen {
 //单线程8皇后
 class Node {
